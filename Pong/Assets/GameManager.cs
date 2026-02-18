@@ -12,13 +12,6 @@ public class GameManager : MonoBehaviour
         theBall = GameObject.FindGameObjectWithTag("Ball"); // Busca a referência da bola
     }
 
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public static void Score (string wallID) {
         if (wallID == "RightWall")
         {

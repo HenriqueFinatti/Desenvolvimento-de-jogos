@@ -20,12 +20,6 @@ public class BallControl : MonoBehaviour
     }
 
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     [System.Obsolete]
     void OnCollisionEnter2D (Collision2D coll) {
         if(coll.collider.CompareTag("Player")){
