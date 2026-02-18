@@ -2,25 +2,52 @@ using UnityEngine;
 
 public class PlayersControl : MonoBehaviour
 {
-    public KeyCode moveUp = KeyCode.W;      // Move a raquete para cima
-    public KeyCode moveDown = KeyCode.S;    // Move a raquete para baixo
-    public float speed = 10.0f;             // Define a velocidade da raquete
-    public float boundY = 2.25f;            // Define os limites em Y
-    private Rigidbody2D rb2d;               // Define o corpo rigido 2D que representa a raquete
+    public float speed = 10.0f;
+    private Rigidbody2D rb2d;
+    private float boundX = 4.0f;
+    private float boundTopY = -1.0f;
+    private float boundBottomY = -7.0f;
     void Start () {
-        rb2d = GetComponent<Rigidbody2D>();     // Inicializa a raquete
+        rb2d = GetComponent<Rigidbody2D>();
     }
 
+    float GetPositionX (float mousePos)
+    {
+        if (mousePos < -boundX)
+        {
+            return -boundX;
+        }
+        if (mousePos > boundX)
+        {
+            return boundX;
+        }
+
+        return mousePos;
+    }
+
+    float GetPositionY (float mousePos)
+    {
+        if (mousePos < boundBottomY)
+        {
+            return boundBottomY;
+        }
+        if (mousePos > boundTopY)
+        {
+            return boundTopY;
+        }
+
+        return mousePos;
+    }
     [System.Obsolete]
     void Update () {
-        //no update
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        var pos = transform.position;
-        pos.x = mousePos.x;
-        pos.y = mousePos.y;
-        transform.position = pos;
-
         Vector3 playerPos = transform.position;
+        var pos = transform.position;
+
+        pos.x = GetPositionX(mousePos.x);
+        pos.y = GetPositionY(mousePos.y);
+
+        transform.position = pos;
 
         Vector3 dir = mousePos - playerPos;
         dir.Normalize();
@@ -31,7 +58,5 @@ public class PlayersControl : MonoBehaviour
         vel.x = speedVec.x;
         vel.y = speedVec.y;
         rb2d.velocity = vel;
-
     }
-
 }
