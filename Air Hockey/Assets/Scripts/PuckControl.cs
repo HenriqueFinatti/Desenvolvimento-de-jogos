@@ -2,24 +2,31 @@ using UnityEngine;
 
 public class PuckControl : MonoBehaviour
 {
-   private Rigidbody2D rb2d;
+    public AudioSource source;
+
+    private Rigidbody2D rb2d;
+    public float maxSpeed = 20f;
     void Start () {
         rb2d = GetComponent<Rigidbody2D>();
+        source = GetComponent<AudioSource>();
     }
 
     [System.Obsolete]
     void OnCollisionEnter2D (Collision2D coll) {
-        if(coll.collider.CompareTag("Player")){
-            Vector2 vel;
-            vel.x = rb2d.velocity.x;
-            vel.y = (rb2d.velocity.y / 2) + (coll.collider.attachedRigidbody.velocity.y / 3);
-            rb2d.velocity = vel;
+        if (coll.gameObject.CompareTag("Player"))
+        {
+            Vector2 hitDirection = (transform.position - coll.transform.position).normalized;
+            float malletSpeed = coll.relativeVelocity.magnitude;
+            Vector2 newVelocity = hitDirection * malletSpeed;
+
+            rb2d.linearVelocity = Vector2.ClampMagnitude(newVelocity, maxSpeed);
         }
+        source.Play();
     }
 
     [System.Obsolete]
     void ResetPuck(){
-        rb2d.velocity = Vector2.zero;
+        rb2d.linearVelocity = Vector2.zero;
         transform.position = Vector2.zero;
     }
 }

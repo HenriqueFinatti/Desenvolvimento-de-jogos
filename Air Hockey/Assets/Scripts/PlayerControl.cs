@@ -7,8 +7,10 @@ public class PlayersControl : MonoBehaviour
     private float boundX = 4.0f;
     private float boundTopY = -1.0f;
     private float boundBottomY = -7.0f;
+    private Vector2 initialPosition;
     void Start () {
         rb2d = GetComponent<Rigidbody2D>();
+        initialPosition = transform.position;
     }
 
     float GetPositionX (float mousePos)
@@ -54,9 +56,14 @@ public class PlayersControl : MonoBehaviour
 
         Vector3 speedVec = dir * speed;
 
-        var vel = rb2d.velocity;
+        var vel = rb2d.linearVelocity;
         vel.x = speedVec.x;
         vel.y = speedVec.y;
-        rb2d.velocity = vel;
+        rb2d.linearVelocity = vel;
+    }
+
+    public void ResetPlayer() {
+        rb2d.linearVelocity = Vector2.zero;
+        transform.position = initialPosition;
     }
 }
