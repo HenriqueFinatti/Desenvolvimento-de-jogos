@@ -1,18 +1,26 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class BallControl : MonoBehaviour
 {
     private Rigidbody2D rb2d;               // Define o corpo rigido 2D que representa a bola
+    [UnityEngine.SerializeField]
+    private float speed = 25f;
+    public int limite = 64;
+    public int hits = 0;
 
 
     // inicializa a bola randomicamente para esquerda ou direita
     void GoBall(){                      
         float rand = Random.Range(0, 2);
+        Vector2 dir;
         if(rand < 1){
-            rb2d.AddForce(new Vector2(20, -15));
+            dir = new Vector2(20, -15);
         } else {
-            rb2d.AddForce(new Vector2(-20, -15));
+            dir = new Vector2(-20, -15);
         }
+        dir = dir.normalized;
+        rb2d.linearVelocity = dir * speed;
     }
 
     void Start () {
@@ -20,13 +28,33 @@ public class BallControl : MonoBehaviour
         Invoke("GoBall", 2);    // Chama a função GoBall após 2 segundos
     }
 
-        // Determina o comportamento da bola nas colisões com os Players (raquetes)
+    // Determina o comportamento da bola nas colisões com os Players (raquetes)
     void OnCollisionEnter2D (Collision2D coll) {
-        if(coll.collider.CompareTag("Player") || coll.collider.CompareTag("WallLimit")){
-            Vector2 vel;
-            vel.x = rb2d.linearVelocity.x;
-            vel.y = (rb2d.linearVelocity.y / 2) + (coll.collider.attachedRigidbody.linearVelocity.y / 3);
-            rb2d.linearVelocity = vel;
+        if(coll.collider.CompareTag("Player")){
+            Vector2 vel = rb2d.linearVelocity;
+            vel.x = (vel.x / 2f) + (coll.collider.attachedRigidbody.linearVelocity.x / 3f);
+            rb2d.linearVelocity = vel.normalized * speed;
         }
     }
+
+    // Função para dar restart no jogo
+    void RestartGame(){
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+        UnityEngine.SceneManagement.SceneManager.GetActiveScene().name
+        );
+    }
+
+    // Chama a funcao quando a bolinha atinge a parte de baixo:
+    void OnTriggerEnter2D(Collider2D other){
+        if (other.CompareTag("WallBottomLimit"))
+        {
+            RestartGame();
+        }
+    }
+
+    
+
+
+
+
 }
