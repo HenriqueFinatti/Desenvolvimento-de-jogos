@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Fase2.unity
     guid: 5cd4bb9647be9114f9985300a07d10cd
+  - enabled: 1
+    path: Assets/Scenes/CenaFinal.unity
+    guid: c4eb5e099a38f594ca9f2a3ae88cd7ef
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0
