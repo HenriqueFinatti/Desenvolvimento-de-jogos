@@ -388,6 +388,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   blockPrefab: {fileID: 1043647802676788181, guid: 26d355fef15c1654a8f713f5b63d4c9c, type: 3}
+  powerUpPrefab: {fileID: 4820812446256715332, guid: 09b8b9a1cc546f04bac42560b4e9b610, type: 3}
   linhas: 2
   colunas: 16
   espacamentoX: 1.2
@@ -1098,7 +1099,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   moveRight: 100
   moveLeft: 97
-  speed: 9
+  speed: 10
   boundX: 8.7
   life: 3
   lifeDisplay: {fileID: 66432476}
@@ -1525,7 +1526,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   speed: 8
-  limite: 1
+  limite: 10
   hits: 0
 --- !u!50 &1935241475
 Rigidbody2D:
@@ -1620,6 +1621,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   blockPrefab: {fileID: 1043647802676788181, guid: b913694a91f37b3409f2003c97b08a66, type: 3}
+  powerUpPrefab: {fileID: 4820812446256715332, guid: 09b8b9a1cc546f04bac42560b4e9b610, type: 3}
   linhas: 2
   colunas: 16
   espacamentoX: 1.2

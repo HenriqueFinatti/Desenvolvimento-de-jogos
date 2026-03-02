@@ -8,6 +8,7 @@ TagManager:
   - WallLimit
   - WallBottomLimit
   - Brick
+  - PowerUp
   layers:
   - Default
   - TransparentFX

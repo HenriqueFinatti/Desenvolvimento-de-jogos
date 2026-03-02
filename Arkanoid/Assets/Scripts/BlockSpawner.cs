@@ -4,7 +4,7 @@ using UnityEngine.SceneManagement;
 public class BlockSpawner : MonoBehaviour
 {
     public GameObject blockPrefab;
-
+    public GameObject powerUpPrefab;
     public int linhas = 2;
     public int colunas = 16;
 

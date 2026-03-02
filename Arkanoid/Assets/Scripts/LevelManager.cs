@@ -42,6 +42,13 @@ public class LevelManager : MonoBehaviour
         if (currentScene.name == "Fase1")
         {
             SceneManager.LoadScene("Fase2");
+            return;
+        }
+
+        if (currentScene.name == "Fase2")
+        {
+            SceneManager.LoadScene("Vitoria");
+            return;
         }
     }
 
