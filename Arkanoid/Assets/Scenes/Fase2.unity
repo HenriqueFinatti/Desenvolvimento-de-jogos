@@ -420,7 +420,7 @@ MonoBehaviour:
   espacamentoY: 0.6
   offsetX: -9
   offsetY: 5
-  sideleft: 0
+  side: 1
 --- !u!4 &470743862
 Transform:
   m_ObjectHideFlags: 0
@@ -472,6 +472,7 @@ MonoBehaviour:
   moveLeft: 97
   speed: 9
   boundX: 8.7
+  life: 3
 --- !u!61 &542552605
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -655,7 +656,7 @@ MonoBehaviour:
   espacamentoY: 0.6
   offsetX: -9
   offsetY: 7
-  sideleft: 1
+  side: 0
 --- !u!4 &596914146
 Transform:
   m_ObjectHideFlags: 0
@@ -1096,7 +1097,7 @@ MonoBehaviour:
   espacamentoY: 0.6
   offsetX: -9
   offsetY: 7
-  sideleft: 2
+  side: 2
 --- !u!4 &1390099679
 Transform:
   m_ObjectHideFlags: 0
@@ -1447,7 +1448,7 @@ Transform:
   m_GameObject: {fileID: 1932982540}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.08, y: -1.8, z: 0}
+  m_LocalPosition: {x: 0, y: -1.8, z: 0}
   m_LocalScale: {x: 1.3, y: 1.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

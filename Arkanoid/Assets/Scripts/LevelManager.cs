@@ -9,27 +9,18 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
-        // encontra a bola na cena
+        // Conecta com a bola
         GameObject ballObj = GameObject.FindGameObjectWithTag("Ball");
         ball = ballObj.GetComponent<BallControl>();
 
-        //Player:
+        // Conecta com o player
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         player = playerObj.GetComponent<PlayerControl>();
-
-    }
-
-    void loadDeath(){
-        SceneManager.LoadScene("CenaFinal");
-
     }
 
     void Update()
     {
         if (loadingNext) return;
-
-        // mostra hits da bola
-        //print("Hits: " + ball.hits);
 
         if (ball.hits == ball.limite)
         {
@@ -37,7 +28,8 @@ public class LevelManager : MonoBehaviour
             LoadNextLevel();
         }
 
-        if (player.life == 0){
+        if (player.life == 0)
+        {
             loadingNext = true;
             loadDeath();
         }
@@ -51,5 +43,10 @@ public class LevelManager : MonoBehaviour
         {
             SceneManager.LoadScene("Fase2");
         }
+    }
+
+    void loadDeath()
+    {
+        SceneManager.LoadScene("CenaFinal");
     }
 }

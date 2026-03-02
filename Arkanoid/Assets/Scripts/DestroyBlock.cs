@@ -6,13 +6,10 @@ public class DestroyBlock : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ball"))
         {
-            
             Destroy(gameObject);
-            // pega o script da bola
+            // Conecta com a bola
             BallControl ballScript = collision.gameObject.GetComponent<BallControl>();
-            // incrementa hits
             ballScript.hits++;
-            
         }
     }
 }
