@@ -59,6 +59,7 @@ public class BallControl : MonoBehaviour
         {
             PlayerControl player = FindObjectOfType<PlayerControl>();
             player.life--;
+            player.UpdateLifeUI();
 
             ResetBall();
         }

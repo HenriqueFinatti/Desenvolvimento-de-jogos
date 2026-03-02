@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using TMPro;
 public class PlayerControl : MonoBehaviour
 {
     public KeyCode moveRight = KeyCode.D;      // Move a raquete para direita
@@ -7,11 +7,13 @@ public class PlayerControl : MonoBehaviour
     public float speed = 8.0f;             // Define a velocidade da raquete
     public float boundX = 7f;            // Define os limites em Y
     private Rigidbody2D rb2d;               // Define o corpo rigido 2D que representa a raquete
-    public int life =3;
+    public int life = 3;
+    public TextMeshProUGUI lifeDisplay;
 
     void Start ()
     {
         rb2d = GetComponent<Rigidbody2D>();     // Inicializa o player
+        UpdateLifeUI();
     }
 
     void Update ()
@@ -41,5 +43,12 @@ public class PlayerControl : MonoBehaviour
             pos.x = -boundX;                    // Corrige a posicao da raquete caso ele ultrapasse o limite inferior
         }
         transform.position = pos;               // Atualiza a posição da raquete
+    }
+    public void UpdateLifeUI()
+    {
+        if (lifeDisplay != null)
+        {
+            lifeDisplay.text = "Vidas: " + life.ToString();
+        }
     }
 }
