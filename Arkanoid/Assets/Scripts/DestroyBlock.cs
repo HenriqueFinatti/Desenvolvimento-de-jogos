@@ -16,6 +16,10 @@ public class DestroyBlock : MonoBehaviour
             // Conecta com a bola
             BallControl ballScript = collision.gameObject.GetComponent<BallControl>();
             ballScript.hits++;
+
+            PlayerControl player = FindObjectOfType<PlayerControl>();
+            player.GainScore();
+            player.UpdateScoreUI();
         }
     }
 

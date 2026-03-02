@@ -28,7 +28,7 @@ public class LevelManager : MonoBehaviour
             LoadNextLevel();
         }
 
-        if (player.life == 0)
+        if (player.GetLife() == 0)
         {
             loadingNext = true;
             loadDeath();

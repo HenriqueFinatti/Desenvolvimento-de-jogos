@@ -533,10 +533,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   textDisplay: {fileID: 1008571149}
   sentences:
-  - No ano de 2026 dois alunos foram desafiados a criar um jogo
+  - "No ano de 2026 dois alunos foram desafiados por um s\xE1bio mago, chamdo Fagner, 
+    a criar um jogo"
   - Seus nomes eram Henrique Finatti e Tiago Fagundes
-  - "Eles ainda eram desconhecidos, mas entrariam para a hist\xF3ria... por orgulho
-    ou vergonha"
+  - Eles ainda eram desconhecidos, mas entrariam para a historia... por orgulho ou
+    vergonha
   - Esse foi o resultado do seu desafio
   typingSpeed: 0.05
   nextSceneName: Fase1

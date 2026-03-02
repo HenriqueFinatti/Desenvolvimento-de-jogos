@@ -25,10 +25,8 @@ public class PowerUpControl : MonoBehaviour
     void AplicarEfeito()
     {
         PlayerControl player = FindObjectOfType<PlayerControl>();
-        print(player.life);
-        player.life++;
+        player.GainLife();
         player.UpdateLifeUI();
-        print(player.life);
 
     }
 }

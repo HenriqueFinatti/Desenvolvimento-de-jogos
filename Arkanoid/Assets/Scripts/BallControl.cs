@@ -58,7 +58,7 @@ public class BallControl : MonoBehaviour
         if (other.CompareTag("WallBottomLimit"))
         {
             PlayerControl player = FindObjectOfType<PlayerControl>();
-            player.life--;
+            player.LoseLife();
             player.UpdateLifeUI();
 
             ResetBall();

@@ -7,13 +7,14 @@ public class PlayerControl : MonoBehaviour
     public float speed = 8.0f;             // Define a velocidade da raquete
     public float boundX = 7f;            // Define os limites em Y
     private Rigidbody2D rb2d;               // Define o corpo rigido 2D que representa a raquete
-    public int life = 3;
     public TextMeshProUGUI lifeDisplay;
-
+    public TextMeshProUGUI scoreDisplay;
+    public GameSettings gameData;
     void Start ()
     {
         rb2d = GetComponent<Rigidbody2D>();     // Inicializa o player
         UpdateLifeUI();
+        UpdateScoreUI();
     }
 
     void Update ()
@@ -48,7 +49,34 @@ public class PlayerControl : MonoBehaviour
     {
         if (lifeDisplay != null)
         {
-            lifeDisplay.text = "Vidas: " + life.ToString();
+            lifeDisplay.text = "Vidas: " + gameData.playerLife.ToString();
         }
+    }
+
+    public void UpdateScoreUI()
+    {
+        if (scoreDisplay != null)
+        {
+            scoreDisplay.text = "Pontos: " + gameData.playerScore.ToString();
+        }
+    }
+    public void LoseLife()
+    {
+        gameData.playerLife--;
+    }
+
+    public void GainLife()
+    {
+        gameData.playerLife++;
+    }
+
+    public int GetLife()
+    {
+        return gameData.playerLife;
+    }
+
+    public void GainScore()
+    {
+        gameData.playerScore += 100;
     }
 }
