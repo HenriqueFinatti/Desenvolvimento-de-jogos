@@ -47,6 +47,6 @@ public class LevelManager : MonoBehaviour
 
     void loadDeath()
     {
-        SceneManager.LoadScene("CenaFinal");
+        SceneManager.LoadScene("Derrota");
     }
 }
