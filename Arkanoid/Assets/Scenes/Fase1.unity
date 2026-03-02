@@ -1283,7 +1283,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   speed: 8
-  limite: 64
+  limite: 1
   hits: 0
 --- !u!50 &1935241475
 Rigidbody2D:

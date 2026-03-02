@@ -7,6 +7,7 @@ public class PlayerControl : MonoBehaviour
     public float speed = 8.0f;             // Define a velocidade da raquete
     public float boundX = 7f;            // Define os limites em Y
     private Rigidbody2D rb2d;               // Define o corpo rigido 2D que representa a raquete
+    public int life =3;
 
     void Start () {
         rb2d = GetComponent<Rigidbody2D>();     // Inicializa o player 

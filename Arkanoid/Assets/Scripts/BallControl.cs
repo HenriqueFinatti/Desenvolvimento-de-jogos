@@ -44,11 +44,26 @@ public class BallControl : MonoBehaviour
         );
     }
 
+    void ResetPlayer(){
+        rb2d.linearVelocity = Vector2.zero;
+        transform.position = Vector2.zero;
+        Invoke("GoBall", 2);
+    }
+
+
     // Chama a funcao quando a bolinha atinge a parte de baixo:
-    void OnTriggerEnter2D(Collider2D other){
+    void OnTriggerEnter2D(Collider2D other)
+    {
         if (other.CompareTag("WallBottomLimit"))
         {
-            RestartGame();
+            PlayerControl player =
+                FindObjectOfType<PlayerControl>();
+
+            player.life--;
+
+            
+
+            ResetPlayer();
         }
     }
 
