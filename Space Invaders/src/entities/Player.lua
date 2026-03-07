@@ -1,5 +1,6 @@
 local Class = require('src.utils.Class')
 local Sprites = require('src.utils.Sprites')
+local Bullet = require('src.entities.Bullet')
 local Player = Class {}
 
 PLAYER_SPEED = 120
@@ -19,13 +20,36 @@ function Player:init(virtual_width, virtual_height)
     local spriteWidth, spriteHeight = Sprites.getDimensions()
     self.width = spriteWidth * self.scale
     self.height = spriteHeight * self.scale
+    self.bullets = {}
+    self.shootTimer = 0
+    self.shootDelay = 1 -- 1s entre os tiros
+
 end
 
 function Player:update(dt)
     self.x = self.x + self.dx * dt
     self.x = math.max(self.width / 2, self.x)
     self.x = math.min(self.virtual_width - self.width / 2, self.x)
+
+    self.shootTimer = self.shootTimer + dt
+
+    if self.shootTimer >= self.shootDelay then
+        self:shoot()
+        self.shootTimer = self.shootTimer - self.shootDelay
+    end
+
+    -- Move os tiros e remove os que saíram da tela
+    for i = #self.bullets, 1, -1 do
+        local bullet = self.bullets[i]
+
+        bullet:update(dt)
+
+        if bullet:isOffscreen() then
+            table.remove(self.bullets, i)
+        end
+    end
 end
+
 
 function Player:getDrawX()
     return self.x - self.width / 2
@@ -69,15 +93,27 @@ function Player:getGunPosition()
 end
 
 function Player:render(alpha)
+    --Renderiza player
     local drawAlpha = alpha or 1
     love.graphics.setColor(1, 0.27, 0.22, drawAlpha)
     Sprites.draw(Sprites.R3C5, self:getDrawX(), self:getDrawY(), self.scale)
     love.graphics.setColor(1, 1, 1, 1)
+    --Renderiza o tiro
+    for _, bullet in ipairs(self.bullets) do
+        bullet:render()
+    end
 end
 
 function Player:drawBoundingBox()
     local x, y, w, h = self:getCollisionRect()
     love.graphics.rectangle('line', x, y, w, h)
+end
+
+function Player:shoot()
+    local gunX, gunY = self:getGunPosition()
+    print("Tiro disparado em: " .. gunX .. ", " .. gunY)
+    local bullet = Bullet(gunX - 1, gunY)
+    table.insert(self.bullets, bullet)
 end
 
 return Player

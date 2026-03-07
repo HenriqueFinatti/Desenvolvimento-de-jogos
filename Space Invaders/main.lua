@@ -9,7 +9,7 @@ local Sprites = require 'src.utils.Sprites'
 local VIRTUAL_WIDTH = 225
 local VIRTUAL_HEIGHT = 300
 local WINDOW_WIDTH = 750
-local WINDOW_HEIGHT = 1000
+local WINDOW_HEIGHT = 800
 
 local function playerDefinitions()
     PlayerShip = Player(VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
@@ -39,6 +39,7 @@ end
 
 function love.update(dt)
     PlayerShip:movePlayer(dt)
+    PlayerShip:update(dt)
 end
 
 function love.draw()
