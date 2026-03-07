@@ -25,4 +25,8 @@ function Bullet:isOffscreen()
     return self.y < 0
 end
 
+function Bullet:getCollisionRect()
+    return self.x, self.y, BULLET_WIDTH, BULLET_HEIGHT
+end
+
 return Bullet

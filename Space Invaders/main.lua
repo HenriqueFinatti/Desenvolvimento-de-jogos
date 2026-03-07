@@ -22,14 +22,53 @@ local function playerDefinitions()
     PlayerShip = Player(VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
 end
 
+-- Função para testar colisão AABB (bounding box)
+local function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
+    return x1 < x2 + w2 and
+           x1 + w1 > x2 and
+           y1 < y2 + h2 and
+           y1 + h1 > y2
+end
+
+-- Função para verificar colisões entre tiros e inimigos
+local function checkBulletEnemyCollisions()
+    for i = #PlayerShip.bullets, 1, -1 do
+        local bullet = PlayerShip.bullets[i]
+        local bx, by, bw, bh = bullet:getCollisionRect()
+
+        for row = 1, 4 do
+            for col = 1, 5 do
+                local enemy = Enemies[row][col]
+                if enemy then
+                    local ex, ey, ew, eh = enemy:getCollisionRect()
+
+                    if checkCollision(bx, by, bw, bh, ex, ey, ew, eh) then
+                        table.remove(PlayerShip.bullets, i)
+                        Enemies[row][col] = nil
+                        break
+                    end
+                end
+            end
+        end
+    end
+end
+
 local function enemyDefinitions()
-    --Definicao da posicao dos inimigos e a mtrzi representada por eles
+    --Definicao da posicao dos inimigos e a matriz representada por eles
     Enemies = {}
 
     local startX = 40
     local startY = 40
     local spacingX = 35
     local spacingY = 25
+
+    -- Cores diferentes para cada linha
+    local rowColors = {
+        {r = 1, g = 0.2, b = 0.2},     -- Linha 1: Vermelho
+        {r = 0.2, g = 1, b = 0.2},     -- Linha 2: Verde
+        {r = 0.2, g = 0.2, b = 1},     -- Linha 3: Azul
+        {r = 1, g = 1, b = 0.2}        -- Linha 4: Amarelo
+    }
 
     for row = 1,4 do
         Enemies[row] = {}
@@ -41,6 +80,7 @@ local function enemyDefinitions()
             enemy.y = startY + (row-1) * spacingY
 
             enemy.row = row
+            enemy.color = rowColors[row]
 
             Enemies[row][col] = enemy
         end
@@ -74,10 +114,16 @@ end
 function love.update(dt)
     PlayerShip:movePlayer(dt)
     PlayerShip:update(dt)
+
+    -- Verificar colisões entre tiros e inimigos
+    checkBulletEnemyCollisions()
+
     --Movimentação do inimigo
     for row=1,4 do
         for col=1,5 do
-            Enemies[row][col]:update(dt)
+            if Enemies[row][col] then
+                Enemies[row][col]:update(dt)
+            end
         end
     end
     fleetTimer = fleetTimer + dt
@@ -92,15 +138,16 @@ function love.update(dt)
         for row=1,4 do
             for col=1,5 do
                 local enemy = Enemies[row][col]
+                if enemy then
+                    enemy.x = enemy.x + fleetDirection
 
-                enemy.x = enemy.x + fleetDirection
+                    if enemy.x > VIRTUAL_WIDTH - 20 then
+                        hitRight = true
+                    end
 
-                if enemy.x > VIRTUAL_WIDTH - 20 then
-                    hitRight = true
-                end
-
-                if enemy.x < 20 then
-                    hitLeft = true
+                    if enemy.x < 20 then
+                        hitLeft = true
+                    end
                 end
             end
         end
@@ -114,8 +161,9 @@ function love.update(dt)
 
             for row=1,4 do
                 for col=1,5 do
-                    Enemies[row][col].y =
-                    Enemies[row][col].y + 10
+                    if Enemies[row][col] then
+                        Enemies[row][col].y = Enemies[row][col].y + 10
+                    end
                 end
             end
         end
@@ -132,7 +180,9 @@ function love.draw()
     PlayerShip:render()
     for row=1,4 do
         for col=1,5 do
-            Enemies[row][col]:render()
+            if Enemies[row][col] then
+                Enemies[row][col]:render()
+            end
         end
     end
     Push:finish()

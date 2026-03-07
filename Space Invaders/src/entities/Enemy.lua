@@ -23,6 +23,7 @@ function Enemy:init(virtual_width, virtual_height)
     local spriteWidth, spriteHeight = Sprites.getDimensions()
     self.width = spriteWidth * self.scale
     self.height = spriteHeight * self.scale
+    self.color = {r = 1, g = 1, b = 1}
 end
 
 function Enemy:update(dt)
@@ -54,7 +55,7 @@ end
 function Enemy:render(alpha)
 
     local drawAlpha = alpha or 1
-    love.graphics.setColor(1, 0.27, 0.22, drawAlpha)
+    love.graphics.setColor(self.color.r, self.color.g, self.color.b, drawAlpha)
     local spriteA
     local spriteB
 
@@ -80,6 +81,10 @@ function Enemy:render(alpha)
 
     love.graphics.setColor(1, 1, 1, 1)
 
+end
+
+function Enemy:getCollisionRect()
+    return self:getDrawX(), self:getDrawY(), self.width, self.height
 end
 
 return Enemy
