@@ -5,6 +5,7 @@ local smallFont = nil
 local Push = require 'src.libs.push'
 local Player = require 'src.entities.Player'
 local Sprites = require 'src.utils.Sprites'
+local Enemy = require 'src.entities.Enemy'
 
 local VIRTUAL_WIDTH = 225
 local VIRTUAL_HEIGHT = 300
@@ -13,6 +14,10 @@ local WINDOW_HEIGHT = 800
 
 local function playerDefinitions()
     PlayerShip = Player(VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+end
+
+local function enemyDefinitions()
+    EnemyShip = Enemy(VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
 end
 
 function love.load()
@@ -31,6 +36,7 @@ function love.load()
     })
 
     playerDefinitions()
+    enemyDefinitions()
 end
 
 function love.resize(w, h)
@@ -40,6 +46,7 @@ end
 function love.update(dt)
     PlayerShip:movePlayer(dt)
     PlayerShip:update(dt)
+    EnemyShip:update(dt)
 end
 
 function love.draw()
@@ -48,5 +55,6 @@ function love.draw()
     love.graphics.clear(10 / 255, 11 / 255, 26 / 255, 1)
 
     PlayerShip:render()
+    EnemyShip:render()
     Push:finish()
 end

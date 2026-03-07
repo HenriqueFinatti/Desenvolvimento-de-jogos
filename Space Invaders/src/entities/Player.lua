@@ -111,7 +111,7 @@ end
 
 function Player:shoot()
     local gunX, gunY = self:getGunPosition()
-    print("Tiro disparado em: " .. gunX .. ", " .. gunY)
+    --print("Tiro disparado em: " .. gunX .. ", " .. gunY)
     local bullet = Bullet(gunX - 1, gunY)
     table.insert(self.bullets, bullet)
 end
