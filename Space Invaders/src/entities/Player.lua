@@ -1,13 +1,18 @@
-Player = Class {}
+local Class = require('src.utils.Class')
+local Sprites = require('src.utils.Sprites')
+local Player = Class {}
 
 PLAYER_SPEED = 120
 PLAYER_SCALE = 0.28
 
-function Player:init(x, y)
-    self.initialX = x
-    self.initialY = y
-    self.x = x
-    self.y = y
+function Player:init(virtual_width, virtual_height)
+    self.virtual_width = virtual_width
+    self.virtual_height = virtual_width
+
+    self.initialX = virtual_width / 2
+    self.initialY = virtual_height - 24
+    self.x = virtual_width / 2
+    self.y = virtual_height - 24
     self.dx = 0
 
     self.scale = PLAYER_SCALE
@@ -19,7 +24,7 @@ end
 function Player:update(dt)
     self.x = self.x + self.dx * dt
     self.x = math.max(self.width / 2, self.x)
-    self.x = math.min(VIRTUAL_WIDTH - self.width / 2, self.x)
+    self.x = math.min(self.virtual_width - self.width / 2, self.x)
 end
 
 function Player:getDrawX()
@@ -40,17 +45,13 @@ function Player:movePlayer(dt)
         self.x = self.x + PLAYER_SPEED * dt
     end
 
--- 2. Largura total e Metade da largura
     local realPlayerWidth = SPRITE_WIDTH * PLAYER_SCALE
     local halfWidth = realPlayerWidth / 2
 
-    -- 3. Limites considerando que o X é o CENTRO do tanque
     if self.x < halfWidth then
-        -- O centro do tanque para a uma distância "halfWidth" da borda 0
         self.x = halfWidth
-    elseif self.x > VIRTUAL_WIDTH - halfWidth then
-        -- O centro do tanque para a uma distância "halfWidth" da borda direita
-        self.x = VIRTUAL_WIDTH - halfWidth
+    elseif self.x > self.virtual_width - halfWidth then
+        self.x = self.virtual_width - halfWidth
     end
 end
 

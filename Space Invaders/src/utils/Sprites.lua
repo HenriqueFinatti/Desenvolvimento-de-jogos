@@ -1,17 +1,3 @@
---[[
-    Sprites module for managing sprite sheets and quads
-
-    Usage:
-        local sprites = require 'Sprites'
-        sprites.load()
-
-        -- Draw a specific sprite
-        sprites.draw(sprites.R1C1, x, y)
-
-        -- Or draw by row/col
-        sprites.drawByGrid(row, col, x, y)
-]]
-
 local Sprites = {}
 
 SPRITE_WIDTH = 110
@@ -63,7 +49,7 @@ skinsInimigo.ENEMY_9 = { Sprites.R2C9, Sprites.R3C1 }
 skinsInimigo.ENEMY_10 = { Sprites.R3C2, Sprites.R3C3 }
 
 function Sprites.load()
-    Sprites.sheet = love.graphics.newImage('Assets/SpaceInvaders.png')
+    Sprites.sheet = love.graphics.newImage('assets/SpaceInvaders.png')
     Sprites.sheet:setFilter('nearest', 'nearest') -- crisp pixels
 
     -- Store sheet dimensions
