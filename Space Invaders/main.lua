@@ -162,6 +162,29 @@ function checkVictory()
     return true
 end
 
+function resetGame()
+    gameOver = false
+    hasWon = false
+
+    EnemyBullets = {}
+
+    fleetDirection = 1
+    fleetTimer = 0
+    currentFleetSpeed = 1
+
+    enemyShootTimer = 0
+
+    playerDefinitions()
+    enemyDefinitions()
+end
+
+function love.keypressed(key)
+    if gameOver and key == "r" then
+        resetGame()
+    end
+end
+
+
 function love.resize(w, h)
     Push:resize(w, h)
 end
@@ -278,6 +301,8 @@ function love.draw()
         love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
         love.graphics.setColor(1, 0, 0, 1)
         love.graphics.printf("DESISTA DOS SEU  SONHOS E MORRA", 0, VIRTUAL_HEIGHT / 2 - 20, VIRTUAL_WIDTH, "center")
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.printf("Pressione R para reiniciar", 0, VIRTUAL_HEIGHT / 2, VIRTUAL_WIDTH, "center")
         love.graphics.setColor(1, 1, 1, 1)
     end
 
