@@ -1,6 +1,5 @@
 ---@diagnostic disable: undefined-global
 local PlayerShip = nil
-local smallFont = nil
 
 local Push = require 'src.libs.push'
 local Player = require 'src.entities.Player'
@@ -11,6 +10,10 @@ local Enemy = require 'src.entities.Enemy'
 local fleetDirection = 1 -- direção eixo x
 local fleetTimer = 0
 local fleetDelay = 0.05
+EnemyBullets = {}  -- Array para armazenar tiros dos inimigos (global)
+local enemyShootTimer = 0
+local enemyShootDelay = 1  -- Um inimigo atira a cada 1 segundo
+local gameOver = false
 
 --Variaveis para definir a janela do jogo
 local VIRTUAL_WIDTH = 225
@@ -29,7 +32,6 @@ local function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
            y1 < y2 + h2 and
            y1 + h1 > y2
 end
-
 
 -- Função para verificar colisões entre tiros e inimigos
 local function checkBulletEnemyCollisions()
@@ -52,6 +54,42 @@ local function checkBulletEnemyCollisions()
                 end
             end
         end
+    end
+end
+
+-- Função para verificar colisões entre tiros de inimigos e player
+local function checkEnemyBulletPlayerCollisions()
+    local px, py, pw, ph = PlayerShip:getCollisionRect()
+
+    for i = #EnemyBullets, 1, -1 do
+        local bullet = EnemyBullets[i]
+        local bx, by, bw, bh = bullet:getCollisionRect()
+
+        if checkCollision(bx, by, bw, bh, px, py, pw, ph) then
+            table.remove(EnemyBullets, i)
+            local playerDied = PlayerShip:loseLife()
+            if playerDied then
+                gameOver = true
+            end
+        end
+    end
+end
+
+-- Função para selecionar um inimigo aleatório e fazer ele atirar
+local function randomEnemyShoot()
+    local aliveEnemies = {}
+
+    for row = 1, 4 do
+        for col = 1, 5 do
+            if Enemies[row][col] then
+                table.insert(aliveEnemies, Enemies[row][col])
+            end
+        end
+    end
+
+    if #aliveEnemies > 0 then
+        local randomEnemy = aliveEnemies[math.random(1, #aliveEnemies)]
+        randomEnemy:shoot()
     end
 end
 
@@ -92,11 +130,9 @@ end
 
 function love.load()
     Sprites.load()
-    smallFont = love.graphics.newFont('assets/font.ttf', 8)
 
     love.window.setTitle('Space Invaders')
     love.graphics.setDefaultFilter('nearest', 'nearest')
-    love.graphics.setFont(smallFont)
 
     Push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
@@ -114,11 +150,34 @@ function love.resize(w, h)
 end
 
 function love.update(dt)
+    if gameOver then
+        return
+    end
+
     PlayerShip:movePlayer(dt)
     PlayerShip:update(dt)
     PlayerShip:drawStats()
     -- Verificar colisões entre tiros e inimigos
     checkBulletEnemyCollisions()
+
+    -- Atualizar tiros dos inimigos e remover os que saíram da tela
+    for i = #EnemyBullets, 1, -1 do
+        local bullet = EnemyBullets[i]
+        bullet:update(dt)
+        if bullet:isOffscreen() then
+            table.remove(EnemyBullets, i)
+        end
+    end
+
+    -- Verificar colisões entre tiros de inimigos e player
+    checkEnemyBulletPlayerCollisions()
+
+    -- Timer para inimigos atirarem (um por segundo)
+    enemyShootTimer = enemyShootTimer + dt
+    if enemyShootTimer >= enemyShootDelay then
+        enemyShootTimer = 0
+        randomEnemyShoot()
+    end
 
     --Movimentação do inimigo
     for row=1,4 do
@@ -187,5 +246,20 @@ function love.draw()
             end
         end
     end
+
+    -- Renderizar tiros dos inimigos
+    for _, bullet in ipairs(EnemyBullets) do
+        bullet:render()
+    end
+
+    -- Tela de Game Over
+    if gameOver then
+        love.graphics.setColor(0, 0, 0, 0.8)
+        love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+        love.graphics.setColor(1, 0, 0, 1)
+        love.graphics.printf("DESISTA DOS SEU  SONHOS E MORRA", 0, VIRTUAL_HEIGHT / 2 - 20, VIRTUAL_WIDTH, "center")
+        love.graphics.setColor(1, 1, 1, 1)
+    end
+
     Push:finish()
 end

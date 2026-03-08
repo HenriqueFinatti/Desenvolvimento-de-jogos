@@ -10,8 +10,6 @@ function Player:init(virtual_width, virtual_height)
     local spriteWidth, spriteHeight = Sprites.getDimensions()
     self.virtual_width = virtual_width
     self.virtual_height = virtual_width
-    self.initialX = virtual_width / 2
-    self.initialY = virtual_height - 24
     self.x = virtual_width / 2
     self.y = virtual_height - 24
     self.dx = 0
@@ -52,7 +50,6 @@ function Player:update(dt)
     end
 end
 
-
 function Player:getDrawX()
     return self.x - self.width / 2
 end
@@ -60,7 +57,6 @@ end
 function Player:getDrawY()
     return self.y - self.height / 2
 end
-
 
 function Player:movePlayer(dt)
     if love.keyboard.isDown("left") or love.keyboard.isDown("a") then
@@ -71,13 +67,10 @@ function Player:movePlayer(dt)
         self.x = self.x + PLAYER_SPEED * dt
     end
 
-    local realPlayerWidth = SPRITE_WIDTH * PLAYER_SCALE
-    local halfWidth = realPlayerWidth / 2
-
-    if self.x < halfWidth then
-        self.x = halfWidth
-    elseif self.x > self.virtual_width - halfWidth then
-        self.x = self.virtual_width - halfWidth
+    if self.x < self.width / 2 then
+        self.x = self.width / 2
+    elseif self.x > self.virtual_width - self.width / 2 then
+        self.x = self.virtual_width - self.width / 2
     end
 end
 
@@ -106,14 +99,9 @@ function Player:render(alpha)
     end
 end
 
-function Player:drawBoundingBox()
-    local x, y, w, h = self:getCollisionRect()
-    love.graphics.rectangle('line', x, y, w, h)
-end
-
 function Player:shoot()
     local gunX, gunY = self:getGunPosition()
-    local bullet = Bullet(gunX - 1, gunY)
+    local bullet = Bullet(gunX - 1, gunY, "player")
     table.insert(self.bullets, bullet)
 end
 
@@ -141,6 +129,11 @@ end
 
 function Player:loseLife()
     self.lives = self.lives - 1
+    if self.lives == 0 then
+        return true
+    else
+        return false
+    end
 end
 
 return Player

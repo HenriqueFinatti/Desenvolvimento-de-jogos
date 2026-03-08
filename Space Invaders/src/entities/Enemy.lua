@@ -1,5 +1,6 @@
 local Class = require('src.utils.Class')
 local Sprites = require('src.utils.Sprites')
+local Bullet = require('src.entities.Bullet')
 local Enemy = Class {}
 
 ENEMY_SPEED = 190
@@ -9,8 +10,6 @@ function Enemy:init(virtual_width, virtual_height)
     self.virtual_width = virtual_width
     self.virtual_height = virtual_width
 
-    self.initialX = virtual_width / 2
-    self.initialY = 30
     self.x = virtual_width / 2
     self.y = 30
     self.dx = 0
@@ -53,7 +52,6 @@ function Enemy:getDrawY()
 end
 
 function Enemy:render(alpha)
-
     local drawAlpha = alpha or 1
     love.graphics.setColor(self.color.r, self.color.g, self.color.b, drawAlpha)
     local spriteA
@@ -85,6 +83,18 @@ end
 
 function Enemy:getCollisionRect()
     return self:getDrawX(), self:getDrawY(), self.width, self.height
+end
+
+function Enemy:getGunPosition()
+    local x = self:getDrawX() + self.width / 2
+    local y = self:getDrawY() + self.height
+    return x, y
+end
+
+function Enemy:shoot()
+    local gunX, gunY = self:getGunPosition()
+    local bullet = Bullet(gunX, gunY, "enemy", Sprites.R3C7)
+    table.insert(EnemyBullets, bullet)
 end
 
 return Enemy
