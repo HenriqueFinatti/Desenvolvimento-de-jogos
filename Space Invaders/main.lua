@@ -10,10 +10,13 @@ local Enemy = require 'src.entities.Enemy'
 local fleetDirection = 1 -- direção eixo x
 local fleetTimer = 0
 local fleetDelay = 0.05
+local currentFleetSpeed = 1 -- Velocidade atual da frota (multiplica o movimento)
 EnemyBullets = {}  -- Array para armazenar tiros dos inimigos (global)
 local enemyShootTimer = 0
 local enemyShootDelay = 1  -- Um inimigo atira a cada 1 segundo
 local gameOver = false
+local hasWon = false
+local victoryVideo = nil
 
 --Variaveis para definir a janela do jogo
 local VIRTUAL_WIDTH = 225
@@ -33,7 +36,7 @@ local function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
            y1 + h1 > y2
 end
 
--- Função para verificar colisões entre tiros e inimigos
+-- Função para verificar colisões entre tiros e inimigos  
 local function checkBulletEnemyCollisions()
     for i = #PlayerShip.bullets, 1, -1 do
         local bullet = PlayerShip.bullets[i]
@@ -49,6 +52,8 @@ local function checkBulletEnemyCollisions()
                         table.remove(PlayerShip.bullets, i)
                         Enemies[row][col] = nil
                         PlayerShip:gainScore(row)
+                        --Aumenta a velocidade conforme os inigmos vao morrendo
+                        currentFleetSpeed = currentFleetSpeed + 0.2
                         break
                     end
                 end
@@ -133,6 +138,7 @@ function love.load()
 
     love.window.setTitle('Space Invaders')
     love.graphics.setDefaultFilter('nearest', 'nearest')
+    victoryVideo = love.graphics.newVideo("assets/vitoria.ogv")
 
     Push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
@@ -145,6 +151,17 @@ function love.load()
     enemyDefinitions()
 end
 
+function checkVictory()
+    for row = 1, 4 do
+        for col = 1, 5 do
+            if Enemies[row][col] then
+                return false
+            end
+        end
+    end
+    return true
+end
+
 function love.resize(w, h)
     Push:resize(w, h)
 end
@@ -152,6 +169,9 @@ end
 function love.update(dt)
     if gameOver then
         return
+    elseif not gameOver and checkVictory() then
+        hasWon = true
+        victoryVideo:play()
     end
 
     PlayerShip:movePlayer(dt)
@@ -200,7 +220,7 @@ function love.update(dt)
             for col=1,5 do
                 local enemy = Enemies[row][col]
                 if enemy then
-                    enemy.x = enemy.x + fleetDirection
+                    enemy.x = enemy.x + (fleetDirection * currentFleetSpeed)
 
                     if enemy.x > VIRTUAL_WIDTH - 20 then
                         hitRight = true
@@ -259,6 +279,10 @@ function love.draw()
         love.graphics.setColor(1, 0, 0, 1)
         love.graphics.printf("DESISTA DOS SEU  SONHOS E MORRA", 0, VIRTUAL_HEIGHT / 2 - 20, VIRTUAL_WIDTH, "center")
         love.graphics.setColor(1, 1, 1, 1)
+    end
+
+    if hasWon then
+        love.graphics.draw(victoryVideo, 0, 0, 0, VIRTUAL_WIDTH / victoryVideo:getWidth(), VIRTUAL_HEIGHT / victoryVideo:getHeight())
     end
 
     Push:finish()
