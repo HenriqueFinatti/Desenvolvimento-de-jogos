@@ -7,21 +7,21 @@ PLAYER_SPEED = 120
 PLAYER_SCALE = 0.28
 
 function Player:init(virtual_width, virtual_height)
+    local spriteWidth, spriteHeight = Sprites.getDimensions()
     self.virtual_width = virtual_width
     self.virtual_height = virtual_width
-
     self.initialX = virtual_width / 2
     self.initialY = virtual_height - 24
     self.x = virtual_width / 2
     self.y = virtual_height - 24
     self.dx = 0
 
-    self.scale = PLAYER_SCALE
-    local spriteWidth, spriteHeight = Sprites.getDimensions()
-    self.width = spriteWidth * self.scale
-    self.height = spriteHeight * self.scale
+    self.width = spriteWidth * PLAYER_SCALE
+    self.height = spriteHeight * PLAYER_SCALE
     self.bullets = {}
     self.shootTimer = 0
+    self.lives = 3
+    self.score = 0
     self.shootDelay = 1 -- 1s entre os tiros
 
 end
@@ -96,7 +96,7 @@ function Player:render(alpha)
     --Renderiza player
     local drawAlpha = alpha or 1
     love.graphics.setColor(1, 0.27, 0.22, drawAlpha)
-    Sprites.draw(Sprites.R3C5, self:getDrawX(), self:getDrawY(), self.scale)
+    Sprites.draw(Sprites.R3C5, self:getDrawX(), self:getDrawY(), PLAYER_SCALE)
     love.graphics.setColor(1, 1, 1, 1)
     --Renderiza o tiro
     for _, bullet in ipairs(self.bullets) do
@@ -111,9 +111,34 @@ end
 
 function Player:shoot()
     local gunX, gunY = self:getGunPosition()
-    --print("Tiro disparado em: " .. gunX .. ", " .. gunY)
     local bullet = Bullet(gunX - 1, gunY)
     table.insert(self.bullets, bullet)
+end
+
+function Player:drawStats()
+    local smallFont = love.graphics.newFont('assets/font.ttf', 8)
+    love.graphics.setFont(smallFont)
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.print('Pontos: ' .. tostring(self.score), 150, 6)
+    love.graphics.print('Vidas: ' .. tostring(self.lives), 6, 6)
+end
+
+function Player:gainScore(row)
+    local newScore = 0
+    if row == 4 then
+        newScore = 10
+    elseif row == 3 then
+        newScore = 20
+    elseif row == 2 then
+        newScore = 30
+    else
+        newScore = 40
+    end
+    self.score = self.score + newScore
+end
+
+function Player:loseLife()
+    self.lives = self.lives - 1
 end
 
 return Player

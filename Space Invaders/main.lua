@@ -9,8 +9,8 @@ local Enemy = require 'src.entities.Enemy'
 
 --Variaveis para definir o movimento da frota de inimigos
 local fleetDirection = 1 -- direção eixo x
-local fleetTimer = 0 
-local fleetDelay = 0.3
+local fleetTimer = 0
+local fleetDelay = 0.05
 
 --Variaveis para definir a janela do jogo
 local VIRTUAL_WIDTH = 225
@@ -30,6 +30,7 @@ local function checkCollision(x1, y1, w1, h1, x2, y2, w2, h2)
            y1 + h1 > y2
 end
 
+
 -- Função para verificar colisões entre tiros e inimigos
 local function checkBulletEnemyCollisions()
     for i = #PlayerShip.bullets, 1, -1 do
@@ -45,6 +46,7 @@ local function checkBulletEnemyCollisions()
                     if checkCollision(bx, by, bw, bh, ex, ey, ew, eh) then
                         table.remove(PlayerShip.bullets, i)
                         Enemies[row][col] = nil
+                        PlayerShip:gainScore(row)
                         break
                     end
                 end
@@ -114,7 +116,7 @@ end
 function love.update(dt)
     PlayerShip:movePlayer(dt)
     PlayerShip:update(dt)
-
+    PlayerShip:drawStats()
     -- Verificar colisões entre tiros e inimigos
     checkBulletEnemyCollisions()
 
@@ -172,12 +174,12 @@ function love.update(dt)
 end
 
 function love.draw()
-    --Renderiza o player e inimigos na tela
     Push:start()
 
     love.graphics.clear(10 / 255, 11 / 255, 26 / 255, 1)
 
     PlayerShip:render()
+    PlayerShip:drawStats()
     for row=1,4 do
         for col=1,5 do
             if Enemies[row][col] then

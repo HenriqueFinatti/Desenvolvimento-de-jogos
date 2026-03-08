@@ -2,7 +2,7 @@ local Class = require('src.utils.Class')
 local Sprites = require('src.utils.Sprites')
 local Enemy = Class {}
 
-ENEMY_SPEED = 90
+ENEMY_SPEED = 190
 ENEMY_SCALE = 0.28
 
 function Enemy:init(virtual_width, virtual_height)
@@ -17,7 +17,7 @@ function Enemy:init(virtual_width, virtual_height)
 
     self.animTimer = 0
     self.animDelay = 0.5
-    self.currentFrame =1
+    self.currentFrame = 1
 
     self.scale = ENEMY_SCALE
     local spriteWidth, spriteHeight = Sprites.getDimensions()
