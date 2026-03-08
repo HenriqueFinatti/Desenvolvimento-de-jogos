@@ -19,10 +19,9 @@ function Player:init(virtual_width, virtual_height)
     self.width = spriteWidth * PLAYER_SCALE
     self.height = spriteHeight * PLAYER_SCALE
     self.bullets = {}
-    self.shootTimer = 0
     self.lives = 3
     self.score = 0
-    self.shootDelay = 1 -- 1s entre os tiros
+    self.spacePressed = false
 
 end
 
@@ -31,11 +30,14 @@ function Player:update(dt)
     self.x = math.max(self.width / 2, self.x)
     self.x = math.min(self.virtual_width - self.width / 2, self.x)
 
-    self.shootTimer = self.shootTimer + dt
-
-    if self.shootTimer >= self.shootDelay then
-        self:shoot()
-        self.shootTimer = self.shootTimer - self.shootDelay
+    -- Detectar tecla de espaço para disparar
+    if love.keyboard.isDown("space") then
+        if not self.spacePressed then
+            self:shoot()
+            self.spacePressed = true
+        end
+    else
+        self.spacePressed = false
     end
 
     -- Move os tiros e remove os que saíram da tela
