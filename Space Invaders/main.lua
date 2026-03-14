@@ -1,6 +1,5 @@
 ---@diagnostic disable: undefined-global
 local PlayerShip = nil
-
 local Push = require 'src.libs.push'
 local Player = require 'src.entities.Player'
 local Sprites = require 'src.utils.Sprites'
@@ -24,6 +23,7 @@ local VIRTUAL_WIDTH = 225
 local VIRTUAL_HEIGHT = 300
 local WINDOW_WIDTH = 750
 local WINDOW_HEIGHT = 800
+local GROUND_Y = VIRTUAL_HEIGHT - 5  -- ✅ CORRIGIDO - Linha do solo
 
 local function playerDefinitions()
     PlayerShip = Player(VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
@@ -55,7 +55,7 @@ local function checkBulletEnemyCollisions()
                         Enemies[row][col] = nil
                         PlayerShip:gainScore(row)
                         --Aumenta a velocidade conforme os inigmos vao morrendo
-                        currentFleetSpeed = currentFleetSpeed + 0.2
+                        currentFleetSpeed = currentFleetSpeed + 1.2
                         break
                     end
                 end
@@ -77,6 +77,20 @@ local function checkEnemyBulletPlayerCollisions()
             local playerDied = PlayerShip:loseLife()
             if playerDied then
                 gameOver = true
+            end
+        end
+    end
+end
+
+-- ✅ Função para verificar se algum inimigo atingiu o solo
+local function checkEnemiesReachedGround()
+    for row = 1, 4 do
+        for col = 1, 5 do
+            local enemy = Enemies[row][col]
+            if enemy and enemy:hasReachedGround(GROUND_Y) then
+                -- Se um inimigo atingiu o solo, o jogador perde imediatamente
+                gameOver = true
+                return
             end
         end
     end
@@ -198,7 +212,6 @@ function love.keypressed(key)
     end
 end
 
-
 function love.resize(w, h)
     Push:resize(w, h)
 end
@@ -219,6 +232,7 @@ function love.update(dt)
     PlayerShip:movePlayer(dt)
     PlayerShip:update(dt)
     PlayerShip:drawStats()
+
     -- Verificar colisões entre tiros e inimigos
     checkBulletEnemyCollisions()
 
@@ -233,6 +247,9 @@ function love.update(dt)
 
     -- Verificar colisões entre tiros de inimigos e player
     checkEnemyBulletPlayerCollisions()
+
+    -- ✅ Verificar se algum inimigo atingiu o solo (ANTES de outros updates!)
+    checkEnemiesReachedGround()
 
     -- Timer para inimigos atirarem (um por segundo)
     enemyShootTimer = enemyShootTimer + dt
@@ -249,6 +266,7 @@ function love.update(dt)
             end
         end
     end
+
     fleetTimer = fleetTimer + dt
 
     if fleetTimer >= fleetDelay then

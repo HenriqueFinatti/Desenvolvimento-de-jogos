@@ -97,4 +97,10 @@ function Enemy:shoot()
     table.insert(EnemyBullets, bullet)
 end
 
+-- Verifica se o inimigo atingiu o solo
+function Enemy:hasReachedGround(groundY)
+    local enemyBottomY = self:getDrawY() + self.height
+    return enemyBottomY >= groundY
+end
+
 return Enemy
