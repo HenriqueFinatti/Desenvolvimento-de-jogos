@@ -17,6 +17,7 @@ local enemyShootDelay = 1  -- Um inimigo atira a cada 1 segundo
 local gameOver = false
 local hasWon = false
 local victoryVideo = nil
+local videoFinished = false  -- Controla se o vídeo acabou
 
 --Variaveis para definir a janela do jogo
 local VIRTUAL_WIDTH = 225
@@ -49,7 +50,8 @@ local function checkBulletEnemyCollisions()
                     local ex, ey, ew, eh = enemy:getCollisionRect()
 
                     if checkCollision(bx, by, bw, bh, ex, ey, ew, eh) then
-                        table.remove(PlayerShip.bullets, i)
+                        -- MODIFICADO: chamar destroy() ao invés de remover direto
+                        bullet:destroy()
                         Enemies[row][col] = nil
                         PlayerShip:gainScore(row)
                         --Aumenta a velocidade conforme os inigmos vao morrendo
@@ -165,6 +167,7 @@ end
 function resetGame()
     gameOver = false
     hasWon = false
+    videoFinished = false
 
     EnemyBullets = {}
 
@@ -176,10 +179,21 @@ function resetGame()
 
     playerDefinitions()
     enemyDefinitions()
+    
+    -- Parar o vídeo e resetar para o início
+    if victoryVideo then
+        victoryVideo:seek(0)
+        victoryVideo:pause()
+    end
 end
 
 function love.keypressed(key)
     if gameOver and key == "r" then
+        resetGame()
+    end
+    
+    -- Permite resetar o jogo após a vitória pressionando R
+    if hasWon and videoFinished and key == "r" then
         resetGame()
     end
 end
@@ -195,6 +209,11 @@ function love.update(dt)
     elseif not gameOver and checkVictory() then
         hasWon = true
         victoryVideo:play()
+    end
+
+    -- Verificar se o vídeo de vitória terminou
+    if hasWon and not videoFinished and victoryVideo:isPlaying() == false then
+        videoFinished = true
     end
 
     PlayerShip:movePlayer(dt)
@@ -306,8 +325,21 @@ function love.draw()
         love.graphics.setColor(1, 1, 1, 1)
     end
 
-    if hasWon then
+    -- Tela de vitória enquanto o vídeo toca
+    if hasWon and not videoFinished then
         love.graphics.draw(victoryVideo, 0, 0, 0, VIRTUAL_WIDTH / victoryVideo:getWidth(), VIRTUAL_HEIGHT / victoryVideo:getHeight())
+    end
+
+    -- Tela de parabéns após o vídeo terminar
+    if hasWon and videoFinished then
+        love.graphics.setColor(0, 0, 0, 1)
+        love.graphics.rectangle("fill", 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
+        
+        love.graphics.setColor(0, 1, 0, 1)
+        love.graphics.printf("PARABENS!", 0, VIRTUAL_HEIGHT / 2 - 30, VIRTUAL_WIDTH, "center")
+        
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.printf("Pressione R para jogar de novo", 0, VIRTUAL_HEIGHT / 2 + 10, VIRTUAL_WIDTH, "center")
     end
 
     Push:finish()

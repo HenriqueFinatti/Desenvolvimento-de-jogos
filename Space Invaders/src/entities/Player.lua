@@ -20,6 +20,7 @@ function Player:init(virtual_width, virtual_height)
     self.lives = 3
     self.score = 0
     self.spacePressed = false
+    self.canShoot = true  -- NOVO: controla se pode atirar
 
 end
 
@@ -30,22 +31,25 @@ function Player:update(dt)
 
     -- Detectar tecla de espaço para disparar
     if love.keyboard.isDown("space") then
-        if not self.spacePressed then
+        if not self.spacePressed and self.canShoot then  -- NOVO: verificar canShoot
             self:shoot()
             self.spacePressed = true
+            self.canShoot = false  -- NOVO: desabilitar disparo
         end
     else
         self.spacePressed = false
     end
 
-    -- Move os tiros e remove os que saíram da tela
+    -- Move os tiros e remove os que saíram da tela ou foram destruídos
     for i = #self.bullets, 1, -1 do
         local bullet = self.bullets[i]
 
         bullet:update(dt)
 
-        if bullet:isOffscreen() then
+        -- MODIFICADO: usar shouldRemove() ao invés de isOffscreen()
+        if bullet:shouldRemove() then
             table.remove(self.bullets, i)
+            self.canShoot = true  -- NOVO: permitir novo disparo quando tiro é removido
         end
     end
 end

@@ -14,6 +14,7 @@ function Bullet:init(x, y, owner, sprite)
     self.x = x
     self.y = y
     self.sprite = sprite or nil
+    self.isDestroyed = false
 
     if owner == "enemy" then
         self.isEnemyBullet = true
@@ -49,6 +50,16 @@ function Bullet:isOffscreen()
     end
 end
 
+-- Marca o tiro como destruído
+function Bullet:destroy()
+    self.isDestroyed = true
+end
+
+-- Verifica se deve ser removido
+function Bullet:shouldRemove()
+    return self.isDestroyed or self:isOffscreen()
+end
+
 function Bullet:getCollisionRect()
     if self.isEnemyBullet then
         return self.x, self.y, ENEMY_BULLET_WIDTH, ENEMY_BULLET_HEIGHT
@@ -56,5 +67,7 @@ function Bullet:getCollisionRect()
         return self.x, self.y, BULLET_WIDTH, BULLET_HEIGHT
     end
 end
+
+
 
 return Bullet
