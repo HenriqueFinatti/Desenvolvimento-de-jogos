@@ -8,6 +8,7 @@ function love.load()
     require("player")
     require("enemy")
     require("bullets")
+    require("powerup")
     
     -- ========== CONFIGURAÇÃO DA TELA ==========
     screenWidth = love.graphics.getWidth()
@@ -28,6 +29,7 @@ function love.load()
     Player:init()
     Enemy:init()
     Bullets:init()
+    Powerup:init()
     initBackgroundSystem()
     initScoreSystem()
     initSlowMotionSystem()
@@ -43,22 +45,28 @@ function love.update(dt)
         return
     end
     
-    -- Aplica o time scale do slow-motion
-    local actualDt = dt
-    if slowMotion.active then
-        actualDt = dt * slowMotion.timeScale
-    end
-    
-    -- ========== ATUALIZAR SLOW-MOTION ==========
+    -- ========== ATUALIZAR SLOW-MOTION (usa dt real, não scaled) ==========
     updateSlowMotion(dt)
     
     -- ========== MOVIMENTO CONTÍNUO DO FUNDO ==========
-    updateBackground(actualDt)
+    -- Fundo é afetado pelo slow-motion
+    local backgroundDt = dt
+    if slowMotion.active then
+        backgroundDt = dt * slowMotion.timeScale
+    end
+    updateBackground(backgroundDt)
     
-    -- ========== ATUALIZAR SYSTEMS ==========
-    Player:update(actualDt)
-    Enemy:update(actualDt, Player)
-    Bullets:update(actualDt, Player, Enemy)
+    -- ========== ATUALIZAR PLAYER (sempre em velocidade normal) ==========
+    Player:update(dt)  -- Sempre usa dt real!
+    
+    -- ========== ATUALIZAR INIMIGOS E POWER-UPS (afetados por slow-motion) ==========
+    local enemyDt = dt
+    if slowMotion.active then
+        enemyDt = dt * slowMotion.timeScale
+    end
+    Enemy:update(enemyDt, Player)
+    Powerup:update(enemyDt, Player)
+    Bullets:update(dt, Player, Enemy)
     
     -- Verifica colisão entre player e inimigos
     checkPlayerEnemyCollision()
@@ -76,6 +84,9 @@ function love.draw()
     
     -- ========== DESENHAR INIMIGOS ==========
     Enemy:draw()
+    
+    -- ========== DESENHAR POWER-UPS ==========
+    Powerup:draw()
     
     -- ========== DESENHAR TIROS ==========
     Bullets:draw()
@@ -161,10 +172,9 @@ end
 function initSlowMotionSystem()
     slowMotion = {
         active = false,
-        duration = 5,
+        duration = 5,          -- Dura 5 segundos
         timer = 0,
-        timeScale = 0.3,
-        threshold = 500,
+        timeScale = 0.3,       -- 30% da velocidade
         activated = false
     }
 end
@@ -176,13 +186,6 @@ function updateSlowMotion(dt)
             slowMotion.active = false
             slowMotion.timer = 0
         end
-    end
-    
-    -- Ativa slow-motion ao atingir threshold
-    if not slowMotion.activated and scoreState.current >= slowMotion.threshold then
-        slowMotion.active = true
-        slowMotion.timer = slowMotion.duration
-        slowMotion.activated = true
     end
 end
 
@@ -271,7 +274,7 @@ function drawUI()
     
     love.graphics.setFont(font)
     love.graphics.print("WASD/Arrows: Move | Space: Shoot | ESC: Quit", 20, screenHeight - 40)
-    love.graphics.print("Reach 500 points for SLOW-MOTION!", 20, screenHeight - 20)
+    love.graphics.print("Colete power-ups verdes para ativar SLOW-MOTION!", 20, screenHeight - 20)
 end
 
 function drawGameOver()
