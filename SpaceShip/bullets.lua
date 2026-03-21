@@ -1,8 +1,3 @@
--- ============================================================================
--- BULLETS.LUA - Módulo de tiros
--- Interage tanto com o player (tiro) quanto com inimigos (colisão)
--- ============================================================================
-
 Bullets = {}
 
 function Bullets:init()

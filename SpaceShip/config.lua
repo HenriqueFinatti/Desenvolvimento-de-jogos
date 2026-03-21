@@ -79,11 +79,3 @@ DIFFICULTY_PRESETS = {
     }
 }
 
--- ========== DICA DE USO ==========
--- Para usar um preset, adicione isto em main.lua após require("config"):
---
--- local currentDifficulty = DIFFICULTY_PRESETS.NORMAL
--- CONFIG_ENEMY.speed = currentDifficulty.enemySpeed
--- CONFIG_ENEMY.spawnInterval = currentDifficulty.enemySpawnInterval
--- CONFIG_SLOWMOTION.threshold = currentDifficulty.slowMotionThreshold
--- etc...

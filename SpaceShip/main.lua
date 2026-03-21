@@ -1,20 +1,14 @@
--- ============================================================================
--- SPACESHIP GAME - main.lua
--- Arquivo principal que carrega tudo e controla o fluxo do jogo
--- ============================================================================
-
 function love.load()
-    -- Carrega os módulos
     require("player")
     require("enemy")
     require("bullets")
     require("powerup")
     
-    -- ========== CONFIGURAÇÃO DA TELA ==========
+    --CONFIGURAÇÃO DA TELA:
     screenWidth = love.graphics.getWidth()
     screenHeight = love.graphics.getHeight()
     
-    -- ========== CARREGAMENTO DE ASSETS ==========
+    --CARREGAMENTO DE ASSETS:
     nebulosa = love.graphics.newImage("Assets/Farback01.png")
     stars = love.graphics.newImage("Assets/Stars.png")
     
@@ -25,7 +19,7 @@ function love.load()
         love.graphics.newImage("Assets/Ship04.png")
     }
     
-    -- ========== INICIALIZAR SISTEMAS ==========
+    -- Inicializa
     Player:init()
     Enemy:init()
     Bullets:init()
@@ -36,30 +30,25 @@ function love.load()
     initGameState()
 end
 
--- ============================================================================
--- UPDATE - Lógica do jogo
--- ============================================================================
+
 function love.update(dt)
     -- Se jogo acabou, não atualiza
     if gameState.gameOver then
         return
     end
     
-    -- ========== ATUALIZAR SLOW-MOTION (usa dt real, não scaled) ==========
     updateSlowMotion(dt)
     
-    -- ========== MOVIMENTO CONTÍNUO DO FUNDO ==========
-    -- Fundo é afetado pelo slow-motion
+    --Fundo sera afetado pleo slow motion
     local backgroundDt = dt
     if slowMotion.active then
         backgroundDt = dt * slowMotion.timeScale
     end
     updateBackground(backgroundDt)
     
-    -- ========== ATUALIZAR PLAYER (sempre em velocidade normal) ==========
-    Player:update(dt)  -- Sempre usa dt real!
-    
-    -- ========== ATUALIZAR INIMIGOS E POWER-UPS (afetados por slow-motion) ==========
+    --ATUALIZAR PLAYER
+    Player:update(dt) 
+
     local enemyDt = dt
     if slowMotion.active then
         enemyDt = dt * slowMotion.timeScale
@@ -72,43 +61,41 @@ function love.update(dt)
     checkPlayerEnemyCollision()
 end
 
--- ============================================================================
--- DRAW - Renderização
--- ============================================================================
+
+--Renderização
 function love.draw()
     love.graphics.setColor(1, 1, 1, 1)
     
-    -- ========== DESENHAR FUNDO ==========
+    -- DESENHAR FUNDO
     drawRepeatingImage(nebulosa, backgroundState.nebulosOffset, 0)
     drawRepeatingImage(stars, backgroundState.starsOffset, 0)
     
-    -- ========== DESENHAR INIMIGOS ==========
+    -- DESENHAR INIMIGOS 
     Enemy:draw()
     
-    -- ========== DESENHAR POWER-UPS ==========
+    --  DESENHAR POWER-UPS 
     Powerup:draw()
     
-    -- ========== DESENHAR TIROS ==========
+    --DESENHAR TIROS
     Bullets:draw()
     
-    -- ========== DESENHAR PLAYER ==========
+    -- DESENHAR PLAYER
     Player:draw(shipFrames)
     
-    -- ========== DESENHAR UI ==========
+    -- DESENHAR UI 
     drawUI()
     
-    -- ========== EFEITO VISUAL DE SLOW-MOTION ==========
+    -- EFEITO VISUAL DE SLOW-MOTION
     drawSlowMotionEffect()
     
-    -- ========== DESENHAR GAME OVER ==========
+    -- DESENHAR GAME OVER 
     if gameState.gameOver then
         drawGameOver()
     end
 end
 
--- ============================================================================
+
 -- SISTEMAS - Background
--- ============================================================================
 
 function initBackgroundSystem()
     backgroundState = {
@@ -141,9 +128,8 @@ function drawRepeatingImage(image, offsetX, offsetY)
     end
 end
 
--- ============================================================================
+
 -- SISTEMAS - Score
--- ============================================================================
 
 function initScoreSystem()
     scoreState = {
@@ -165,10 +151,7 @@ function updateScoreText()
     scoreState.text = "Score: " .. scoreState.current
 end
 
--- ============================================================================
 -- SISTEMAS - Slow Motion
--- ============================================================================
-
 function initSlowMotionSystem()
     slowMotion = {
         active = false,
@@ -202,9 +185,9 @@ function drawSlowMotionEffect()
     end
 end
 
--- ============================================================================
+
 -- SISTEMAS - Game State
--- ============================================================================
+
 
 function initGameState()
     gameState = {
@@ -212,9 +195,8 @@ function initGameState()
     }
 end
 
--- ============================================================================
+
 -- COLISÕES
--- ============================================================================
 
 function checkPlayerEnemyCollision()
     for i = #Enemy.list, 1, -1 do
@@ -261,9 +243,9 @@ function checkCollision(x1, y1, size1, x2, y2, size2)
     return distance < (size1 + size2)
 end
 
--- ============================================================================
+
 -- UI
--- ============================================================================
+
 
 function drawUI()
     local font = love.graphics.getFont()
@@ -274,7 +256,7 @@ function drawUI()
     
     love.graphics.setFont(font)
     love.graphics.print("WASD/Arrows: Move | Space: Shoot | ESC: Quit", 20, screenHeight - 40)
-    love.graphics.print("Colete power-ups verdes para ativar SLOW-MOTION!", 20, screenHeight - 20)
+    love.graphics.print("Colete power-ups para ativar SLOW-MOTION!", 20, screenHeight - 20)
 end
 
 function drawGameOver()
@@ -301,9 +283,9 @@ function drawGameOver()
     love.graphics.printf("Press R to Restart", screenWidth/2 - 150, screenHeight/2 + 80, 300, "center")
 end
 
--- ============================================================================
+
 -- INPUT
--- ============================================================================
+
 
 function love.keypressed(key)
     if key == "escape" then
@@ -314,14 +296,5 @@ function love.keypressed(key)
     end
 end
 
--- ============================================================================
--- GAME OVER
--- ============================================================================
 
-function gameOver()
-    print("========== GAME OVER ==========")
-    print("Final Score: " .. scoreState.current)
-    print("Max Score: " .. scoreState.max)
-    print("===============================")
-    gameState.gameOver = true
-end
+
