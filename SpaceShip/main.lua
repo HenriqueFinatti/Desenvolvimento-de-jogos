@@ -1,16 +1,22 @@
--- Cena de Nave no Espaço com Efeito Parallax
--- Este script cria a ilusão de movimento da nave manipulando as posições das camadas de fundo
+-- ============================================================================
+-- SPACESHIP GAME - main.lua
+-- Arquivo principal que carrega tudo e controla o fluxo do jogo
+-- ============================================================================
 
 function love.load()
-    -- Dimensões da tela
+    -- Carrega os módulos
+    require("player")
+    require("enemy")
+    require("bullets")
+    
+    -- ========== CONFIGURAÇÃO DA TELA ==========
     screenWidth = love.graphics.getWidth()
     screenHeight = love.graphics.getHeight()
     
-    -- Carrega as imagens
-    nebulosa = love.graphics.newImage("Assets/Farback01.png") -- ou Farback02.png
+    -- ========== CARREGAMENTO DE ASSETS ==========
+    nebulosa = love.graphics.newImage("Assets/Farback01.png")
     stars = love.graphics.newImage("Assets/Stars.png")
     
-    -- Carrega as 4 frames da animação da nave
     shipFrames = {
         love.graphics.newImage("Assets/Ship01.png"),
         love.graphics.newImage("Assets/Ship02.png"),
@@ -18,114 +24,301 @@ function love.load()
         love.graphics.newImage("Assets/Ship04.png")
     }
     
-    -- Variáveis de animação
-    currentFrame = 1
-    animationTimer = 0
-    animationSpeed = 0.1  -- Tempo entre frames (em segundos). Aumente para mais lento, diminua para mais rápido
-    
-    -- Velocidade da nave (controla a velocidade do parallax)
-    shipSpeed = 200 -- pixels por segundo
-    
-    -- Posições de offset para criar o efeito de movimento
-    nebulosOffset = 0
-    starsOffset = 0
-    
-    -- Velocidades multiplicadoras (parallax effect)
-    -- Quanto maior o número, mais rápido o fundo se move
-    nebulosSpeedMultiplier = 0.3  -- Nebulosa mais próxima, se move mais rápido
-    starsSpeedMultiplier = 0.5    -- Estrelas em meio termo
+    -- ========== INICIALIZAR SISTEMAS ==========
+    Player:init()
+    Enemy:init()
+    Bullets:init()
+    initBackgroundSystem()
+    initScoreSystem()
+    initSlowMotionSystem()
+    initGameState()
 end
 
+-- ============================================================================
+-- UPDATE - Lógica do jogo
+-- ============================================================================
 function love.update(dt)
-    -- Atualiza a animação da nave
-    animationTimer = animationTimer + dt
-    
-    if animationTimer >= animationSpeed then
-        -- Avança para o próximo frame
-        currentFrame = currentFrame + 1
-        
-        -- Volta ao primeiro frame quando chegar no final
-        if currentFrame > #shipFrames then
-            currentFrame = 1
-        end
-        
-        -- Reseta o timer
-        animationTimer = 0
+    -- Se jogo acabou, não atualiza
+    if gameState.gameOver then
+        return
     end
     
-    -- Movimento horizontal (esquerda/direita)
-    local moveX = 0
-    
-    if love.keyboard.isDown("right") or love.keyboard.isDown("d") then
-        moveX = shipSpeed * dt
+    -- Aplica o time scale do slow-motion
+    local actualDt = dt
+    if slowMotion.active then
+        actualDt = dt * slowMotion.timeScale
     end
     
-    -- Movimento vertical (cima/baixo)
-    local moveY = 0
+    -- ========== ATUALIZAR SLOW-MOTION ==========
+    updateSlowMotion(dt)
     
+    -- ========== MOVIMENTO CONTÍNUO DO FUNDO ==========
+    updateBackground(actualDt)
     
+    -- ========== ATUALIZAR SYSTEMS ==========
+    Player:update(actualDt)
+    Enemy:update(actualDt, Player)
+    Bullets:update(actualDt, Player, Enemy)
     
-    -- Atualiza os offsets com efeito parallax
-    -- O sinal negativo faz o fundo se mover na direção oposta (parecendo que a nave se move)
-    nebulosOffset = nebulosOffset - moveX * nebulosSpeedMultiplier
-    starsOffset = starsOffset - moveX * starsSpeedMultiplier
-    
-    -- Para movimento vertical (opcional, comente se não quiser)
-    nebulosOffset = nebulosOffset - moveY * nebulosSpeedMultiplier
-    starsOffset = starsOffset - moveY * starsSpeedMultiplier
+    -- Verifica colisão entre player e inimigos
+    checkPlayerEnemyCollision()
 end
 
+-- ============================================================================
+-- DRAW - Renderização
+-- ============================================================================
 function love.draw()
-    -- Define cor branca como padrão
     love.graphics.setColor(1, 1, 1, 1)
     
-    -- Desenha nebulosa (fundo mais distante)
-    drawRepeatingImage(nebulosa, nebulosOffset, 0)
+    -- ========== DESENHAR FUNDO ==========
+    drawRepeatingImage(nebulosa, backgroundState.nebulosOffset, 0)
+    drawRepeatingImage(stars, backgroundState.starsOffset, 0)
     
-    -- Desenha estrelas (segundo plano)
-    drawRepeatingImage(stars, starsOffset, 0)
+    -- ========== DESENHAR INIMIGOS ==========
+    Enemy:draw()
     
-    -- Desenha a nave no centro da tela
-    drawShip()
+    -- ========== DESENHAR TIROS ==========
+    Bullets:draw()
     
-    -- Desenha instruções na tela
-    love.graphics.setColor(1, 1, 1, 0.8)
-    love.graphics.print("Use WASD ou Setas para mover", 10, 10)
-    love.graphics.print("ESC para sair", 10, 30)
+    -- ========== DESENHAR PLAYER ==========
+    Player:draw(shipFrames)
     
-    if love.keyboard.isDown("escape") then
-        love.event.quit()
+    -- ========== DESENHAR UI ==========
+    drawUI()
+    
+    -- ========== EFEITO VISUAL DE SLOW-MOTION ==========
+    drawSlowMotionEffect()
+    
+    -- ========== DESENHAR GAME OVER ==========
+    if gameState.gameOver then
+        drawGameOver()
     end
 end
 
--- Função auxiliar para desenhar imagens que se repetem
+-- ============================================================================
+-- SISTEMAS - Background
+-- ============================================================================
+
+function initBackgroundSystem()
+    backgroundState = {
+        scrollSpeed = 80,
+        nebulosOffset = 0,
+        starsOffset = 0,
+        nebulosSpeedMultiplier = 0.3,
+        starsSpeedMultiplier = 0.5
+    }
+end
+
+function updateBackground(actualDt)
+    backgroundState.nebulosOffset = backgroundState.nebulosOffset - 
+        backgroundState.scrollSpeed * actualDt * backgroundState.nebulosSpeedMultiplier
+    backgroundState.starsOffset = backgroundState.starsOffset - 
+        backgroundState.scrollSpeed * actualDt * backgroundState.starsSpeedMultiplier
+end
+
 function drawRepeatingImage(image, offsetX, offsetY)
     local imgWidth = image:getWidth()
     local imgHeight = image:getHeight()
     
-    -- Normaliza o offset para evitar que cresça infinitamente
     offsetX = offsetX % imgWidth
     if offsetX < 0 then offsetX = offsetX + imgWidth end
     
-    -- Desenha a imagem e uma cópia dela para criar efeito contínuo
     love.graphics.draw(image, offsetX, offsetY)
     
-    -- Se há espaço vazio à direita, desenha outra cópia
     if offsetX > 0 then
         love.graphics.draw(image, offsetX - imgWidth, offsetY)
     end
 end
 
--- Função para desenhar a nave no centro com animação
-function drawShip()
-    -- Obtém o frame atual
-    local shipImage = shipFrames[currentFrame]
-    local shipWidth = shipImage:getWidth()
-    local shipHeight = shipImage:getHeight()
+-- ============================================================================
+-- SISTEMAS - Score
+-- ============================================================================
+
+function initScoreSystem()
+    scoreState = {
+        current = 0,
+        max = 0
+    }
+    updateScoreText()
+end
+
+function addScore(points)
+    scoreState.current = scoreState.current + points
+    if scoreState.current > scoreState.max then
+        scoreState.max = scoreState.current
+    end
+    updateScoreText()
+end
+
+function updateScoreText()
+    scoreState.text = "Score: " .. scoreState.current
+end
+
+-- ============================================================================
+-- SISTEMAS - Slow Motion
+-- ============================================================================
+
+function initSlowMotionSystem()
+    slowMotion = {
+        active = false,
+        duration = 5,
+        timer = 0,
+        timeScale = 0.3,
+        threshold = 500,
+        activated = false
+    }
+end
+
+function updateSlowMotion(dt)
+    if slowMotion.active then
+        slowMotion.timer = slowMotion.timer - dt
+        if slowMotion.timer <= 0 then
+            slowMotion.active = false
+            slowMotion.timer = 0
+        end
+    end
     
-    -- Centraliza a nave na tela
-    local shipX = (screenWidth - shipWidth) / 2
-    local shipY = (screenHeight - shipHeight) / 2
+    -- Ativa slow-motion ao atingir threshold
+    if not slowMotion.activated and scoreState.current >= slowMotion.threshold then
+        slowMotion.active = true
+        slowMotion.timer = slowMotion.duration
+        slowMotion.activated = true
+    end
+end
+
+function drawSlowMotionEffect()
+    if slowMotion.active then
+        love.graphics.setColor(0.2, 0.4, 1, 0.1)
+        love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
+        
+        local font = love.graphics.getFont()
+        love.graphics.setColor(0.2, 0.8, 1, 0.8)
+        local slowText = "SLOW MOTION! " .. string.format("%.1f", slowMotion.timer) .. "s"
+        local textWidth = font:getWidth(slowText)
+        love.graphics.printf(slowText, screenWidth/2 - textWidth/2, 50, screenWidth, "center")
+    end
+end
+
+-- ============================================================================
+-- SISTEMAS - Game State
+-- ============================================================================
+
+function initGameState()
+    gameState = {
+        gameOver = false
+    }
+end
+
+-- ============================================================================
+-- COLISÕES
+-- ============================================================================
+
+function checkPlayerEnemyCollision()
+    for i = #Enemy.list, 1, -1 do
+        local enemy = Enemy.list[i]
+        -- Usa dimensões reais: Player.width x Player.height e Enemy.size x Enemy.size
+        -- Colisão de caixa (AABB) é mais precisa que círculo
+        if checkAABBCollision(
+            Player.x, Player.y, Player.width, Player.height,
+            enemy.x - Enemy.size/2, enemy.y - Enemy.size/2, Enemy.size, Enemy.size
+        ) then
+            -- Se player não está invulnerável
+            if not Player.invulnerable then
+                -- Ativa invulnerabilidade
+                Player.invulnerable = true
+                Player.invulnerableTimer = Player.invulnerableDuration
+                
+                -- Reduz vida
+                Player.health = Player.health - 1
+                
+                -- Remove inimigo
+                table.remove(Enemy.list, i)
+                
+                -- Verifica game over
+                if Player.health <= 0 then
+                    gameState.gameOver = true
+                end
+            end
+        end
+    end
+end
+
+-- Colisão de caixa (AABB) - mais precisa que círculo
+function checkAABBCollision(x1, y1, w1, h1, x2, y2, w2, h2)
+    return x1 < x2 + w2 and
+           x1 + w1 > x2 and
+           y1 < y2 + h2 and
+           y1 + h1 > y2
+end
+
+function checkCollision(x1, y1, size1, x2, y2, size2)
+    local dx = x1 - x2
+    local dy = y1 - y2
+    local distance = math.sqrt(dx*dx + dy*dy)
+    return distance < (size1 + size2)
+end
+
+-- ============================================================================
+-- UI
+-- ============================================================================
+
+function drawUI()
+    local font = love.graphics.getFont()
+    love.graphics.setColor(1, 1, 1, 0.9)
+    love.graphics.print(scoreState.text, 20, 20)
+    love.graphics.print("Max: " .. scoreState.max, 20, 50)
+    love.graphics.print("Health: " .. Player.health .. "/" .. Player.maxHealth, 20, 80)
     
-    love.graphics.draw(shipImage, shipX, shipY)
+    love.graphics.setFont(font)
+    love.graphics.print("WASD/Arrows: Move | Space: Shoot | ESC: Quit", 20, screenHeight - 40)
+    love.graphics.print("Reach 500 points for SLOW-MOTION!", 20, screenHeight - 20)
+end
+
+function drawGameOver()
+    -- Overlay escuro
+    love.graphics.setColor(0, 0, 0, 0.7)
+    love.graphics.rectangle("fill", 0, 0, screenWidth, screenHeight)
+    
+    -- Texto Game Over
+    love.graphics.setColor(1, 0.2, 0.2, 1)
+    local bigFont = love.graphics.newFont(64)
+    love.graphics.setFont(bigFont)
+    love.graphics.printf("GAME OVER", screenWidth/2 - 200, screenHeight/2 - 100, 400, "center")
+    
+    -- Score final
+    love.graphics.setColor(1, 1, 1, 1)
+    local mediumFont = love.graphics.newFont(32)
+    love.graphics.setFont(mediumFont)
+    love.graphics.printf("Score: " .. scoreState.current, screenWidth/2 - 150, screenHeight/2, 300, "center")
+    
+    -- Instrução
+    love.graphics.setColor(1, 1, 1, 0.8)
+    local smallFont = love.graphics.newFont(24)
+    love.graphics.setFont(smallFont)
+    love.graphics.printf("Press R to Restart", screenWidth/2 - 150, screenHeight/2 + 80, 300, "center")
+end
+
+-- ============================================================================
+-- INPUT
+-- ============================================================================
+
+function love.keypressed(key)
+    if key == "escape" then
+        love.event.quit()
+    elseif key == "r" and gameState.gameOver then
+        -- Reinicia o jogo
+        love.load()
+    end
+end
+
+-- ============================================================================
+-- GAME OVER
+-- ============================================================================
+
+function gameOver()
+    print("========== GAME OVER ==========")
+    print("Final Score: " .. scoreState.current)
+    print("Max Score: " .. scoreState.max)
+    print("===============================")
+    gameState.gameOver = true
 end

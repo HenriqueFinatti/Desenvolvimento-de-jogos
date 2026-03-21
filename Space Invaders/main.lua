@@ -94,12 +94,12 @@ local function checkBulletEnemyCollisions()
                 local enemy = Enemies[row][col]
                 if enemy then
                     local ex, ey, ew, eh = enemy:getCollisionRect()
-                    
+                        
                     if checkCollision(bx, by, bw, bh, ex, ey, ew, eh) then
                         bullet:destroy()
                         Enemies[row][col] = nil
                         PlayerShip:gainScore(row)
-                        currentFleetSpeed = currentFleetSpeed + 0.4
+                        currentFleetSpeed = currentFleetSpeed + 0.25
                         break
                     end
                 end
