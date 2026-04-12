@@ -6,7 +6,7 @@ local larguraJogo, alturaJogo = 512, 256
 
 function love.load()
     wf = require "windfield"
-    world = wf.newWorld(0, 0)
+    world = wf.newWorld(0, 800)
     anim8 = require "anim8"
     love.graphics.setDefaultFilter("nearest", "nearest")
     player = {}
@@ -28,14 +28,13 @@ function love.load()
 
     canvas = love.graphics.newCanvas(larguraJogo, alturaJogo)
 
+    plataforms = {}
 
-    walls = {}
-
-    if map.layers["Walls"] then
-        for i, obj in pairs(map.layers["Walls"].objects) do
-            local wall = world:newRectangleCollider(obj.x, obj.y, obj.width, obj.height)
-            wall:setType('static')
-            table.insert(walls, wall)
+    if map.layers["Plataforms"] then
+        for i, obj in pairs(map.layers["Plataforms"].objects) do
+            local plataform = world:newRectangleCollider(obj.x, obj.y, obj.width, obj.height)
+            plataform:setType('static')
+            table.insert(plataforms, plataform)
         end
     end
     love.window.setMode(0, 0, {fullscreen = true})
@@ -44,7 +43,7 @@ end
 function love.update(dt)
     local isMoving = false
     local vx = 0
-
+    local _, vy = player.collider:getLinearVelocity()
     if love.keyboard.isDown("right") then
         vx = player.speed
         player.anim = player.animation.right
@@ -57,7 +56,7 @@ function love.update(dt)
         isMoving = true
     end
 
-    player.collider:setLinearVelocity(vx, 0)
+    player.collider:setLinearVelocity(vx, vy)
 
     if isMoving == false then
         player.anim:gotoFrame(2)
@@ -71,6 +70,10 @@ end
 
 function love.keypressed(key)
     if key == "escape" then love.event.quit() end
+
+    if key == "space" or key == "up" or key == "w" then
+        player.collider:applyLinearImpulse(0, -300)
+    end
 end
 
 function love.draw()
@@ -83,7 +86,6 @@ function love.draw()
 
     love.graphics.push()
     love.graphics.translate(-camX, -camY)
-    -- world:draw()
     love.graphics.pop()
 
     love.graphics.setCanvas()
