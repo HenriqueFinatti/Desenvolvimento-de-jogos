@@ -8,6 +8,8 @@ local derrota = false
 local vidas = 3
 local obstaculos = {}
 local imgGigante
+local bgScroll = 0
+local bgVelocidade = 20 -- Velocidade do movimento automático (pixels por segundo)
 
 function love.load()
     wf = require "windfield"
@@ -20,6 +22,9 @@ function love.load()
     }
     btnReiniciar.x = (larguraJogo / 2) - (btnReiniciar.largura / 2)
     btnReiniciar.y = (alturaJogo / 2) + 40
+
+    imgBackground = love.graphics.newImage("assets/background.png")
+    imgBackground:setWrap("repeat", "repeat")
 
     imgGigante = love.graphics.newImage("assets/gigante.png")
     somAparecer = love.audio.newSource("assets/vai-corinthians003.mp3", "static")
@@ -89,6 +94,8 @@ function love.load()
             table.insert(endGame, item)
         end
     end
+
+    bgEfeitoEscala = alturaJogo / imgBackground:getHeight()
     love.window.setMode(0, 0, {fullscreen = true})
 end
 
@@ -97,6 +104,8 @@ function love.update(dt)
     local isMoving = false
     local vx = 0
     local _, vy = player.collider:getLinearVelocity()
+
+    bgScroll = bgScroll + bgVelocidade * dt
 
     if player.collider:enter('End') then
         venceu = true
@@ -198,6 +207,13 @@ function love.draw()
         love.graphics.rectangle("line", btnReiniciar.x, btnReiniciar.y, btnReiniciar.largura, btnReiniciar.altura, 5)
         love.graphics.printf(btnReiniciar.texto, btnReiniciar.x, btnReiniciar.y + 8, btnReiniciar.largura, "center")
     else
+        local fatorParallax = 0.9
+        local larguraRealImagem = imgBackground:getWidth() * bgEfeitoEscala
+        local bgX = ((-camX * fatorParallax) - bgScroll) % larguraRealImagem
+
+        for i = -1, math.ceil(larguraJogo / larguraRealImagem) do
+            love.graphics.draw(imgBackground, bgX + (i * larguraRealImagem), 0, 0, bgEfeitoEscala, bgEfeitoEscala)
+        end
         map:draw(-camX, -camY)
 
         for _, obs in ipairs(obstaculos) do
