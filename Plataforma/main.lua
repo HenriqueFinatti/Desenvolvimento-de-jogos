@@ -9,8 +9,8 @@ local vidas = 3
 local obstaculos = {}
 local imgGigante
 local bgScroll = 0
-local bgVelocidade = 20 -- Velocidade do movimento automático (pixels por segundo)
-
+local bgVelocidade = 20
+local estado = "menu"
 function love.load()
     wf = require "windfield"
     world = wf.newWorld(0, 800)
@@ -100,6 +100,7 @@ function love.load()
 end
 
 function love.update(dt)
+    if estado ~= "jogando" then return end
     if venceu or derrota then return end
     local isMoving = false
     local vx = 0
@@ -179,6 +180,10 @@ end
 function love.keypressed(key)
     if key == "escape" then love.event.quit() end
 
+    if estado == "menu" and key == "return" then
+        estado = "jogando"
+    end
+
     if key == "space" or key == "up" or key == "w" then
         player.collider:applyLinearImpulse(0, -300)
     end
@@ -188,7 +193,26 @@ function love.draw()
     love.graphics.setCanvas(canvas)
     love.graphics.clear()
 
-    if venceu or derrota then
+    if estado == "menu" then
+        love.graphics.clear(0.1, 0.1, 0.2)
+        love.graphics.setColor(1, 1, 1)
+
+        love.graphics.printf("INSTRUÇÕES", 0, 30, larguraJogo, "center")
+
+        local instrucoes = [[
+- Use as SETAS para se mover
+- Espaço para PULAR
+- Chegue na ESTRELA AMARELA
+- Você tem 3 VIDAS
+
+Aperte ENTER para começar!
+        ]]
+        love.graphics.printf(instrucoes, 20, 70, larguraJogo - 40, "center")
+
+        love.graphics.setColor(1, 0.8, 0)
+        love.graphics.printf("VAI CORINTHIANS!", 0, 200, larguraJogo, "center")
+
+    elseif venceu or derrota then
         if venceu then
             audio_vitoria:play()
             love.graphics.clear(0.1, 0.5, 0.3)
