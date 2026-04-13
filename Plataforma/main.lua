@@ -182,6 +182,8 @@ function love.keypressed(key)
 
     if estado == "menu" and key == "return" then
         estado = "jogando"
+        corinthians = love.audio.newSource("assets/corinthians-radio-globo.mp3", "static")
+        corinthians:play()
     end
 
     if key == "space" or key == "up" or key == "w" then
@@ -194,22 +196,21 @@ function love.draw()
     love.graphics.clear()
 
     if estado == "menu" then
-        love.graphics.clear(0.1, 0.1, 0.2)
+        love.graphics.clear(0, 0, 0)
         love.graphics.setColor(1, 1, 1)
 
         love.graphics.printf("INSTRUÇÕES", 0, 30, larguraJogo, "center")
 
         local instrucoes = [[
-- Use as SETAS para se mover
-- Espaço para PULAR
-- Chegue na ESTRELA AMARELA
-- Você tem 3 VIDAS
+            - Use as SETAS para se mover
+            - Espaço para PULAR
+            - Chegue na ESTRELA AMARELA
+            - Você tem 3 VIDAS
 
-Aperte ENTER para começar!
+            Aperte ENTER para começar!
         ]]
         love.graphics.printf(instrucoes, 20, 70, larguraJogo - 40, "center")
 
-        love.graphics.setColor(1, 0.8, 0)
         love.graphics.printf("VAI CORINTHIANS!", 0, 200, larguraJogo, "center")
 
     elseif venceu or derrota then
