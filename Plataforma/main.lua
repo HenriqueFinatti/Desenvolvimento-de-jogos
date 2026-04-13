@@ -17,7 +17,7 @@ function love.load()
     largura = 100,
     altura = 30,
     texto = "REINICIAR"
-}
+    }
     btnReiniciar.x = (larguraJogo / 2) - (btnReiniciar.largura / 2)
     btnReiniciar.y = (alturaJogo / 2) + 40
 
